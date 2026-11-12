@@ -31,15 +31,20 @@ const posterShapes = {
     "left-[46%] top-[17%] h-[55%] w-[8%] rotate-14 rounded-full bg-white/45",
 };
 
-export default function MediaCard({ item }) {
+export const ART_OPTIONS = Object.keys(posterBackgrounds);
+
+export default function MediaCard({ item, onToggleWatchNext, onRemove }) {
+  const bgClass = posterBackgrounds[item.art] ?? posterBackgrounds.garden;
+  const shapeClass = posterShapes[item.art] ?? posterShapes.garden;
+
   return (
-    <article className="min-w-0">
+    <article className="group min-w-0">
       <div
-        className={`relative isolate flex aspect-[2/3] flex-col justify-between overflow-hidden bg-gradient-to-br text-white ${posterBackgrounds[item.art]}`}
+        className={`relative isolate flex aspect-[2/3] flex-col justify-between overflow-hidden bg-gradient-to-br text-white ${bgClass}`}
       >
         <div
           aria-hidden="true"
-          className={`absolute z-0 border border-white/30 shadow-xl ${posterShapes[item.art]}`}
+          className={`absolute z-0 border border-white/30 shadow-xl ${shapeClass}`}
         />
         <div
           aria-hidden="true"
@@ -48,9 +53,24 @@ export default function MediaCard({ item }) {
         <span className="relative z-10 ml-2.5 mt-3 text-[7px] font-bold tracking-[1.6px] text-white/85">
           AULA PICTURES
         </span>
-        <div className="absolute right-2 top-0 z-20 rounded-b-md bg-sky-300 px-1.5 py-2 text-sky-800">
+        <button
+          aria-label={
+            item.watchNext
+              ? `Remove ${item.title} from Watch next`
+              : `Add ${item.title} to Watch next`
+          }
+          aria-pressed={item.watchNext}
+          className={`absolute right-2 top-0 z-20 cursor-pointer rounded-b-md px-1.5 py-2 transition-colors ${
+            item.watchNext
+              ? "bg-sky-300 text-sky-900 hover:bg-sky-200"
+              : "bg-black/45 text-white/75 hover:bg-black/65 hover:text-white"
+          }`}
+          onClick={() => onToggleWatchNext?.(item.id)}
+          title={item.watchNext ? "In Watch next" : "Add to Watch next"}
+          type="button"
+        >
           <WatchIcon className="size-4" />
-        </div>
+        </button>
         <div className="relative z-10 px-3 pb-3.5 [text-shadow:0_1px_8px_rgb(0_0_0/35%)]">
           <span className="mb-1.5 block text-[7px] font-bold tracking-[1.5px] text-white/85">
             {item.genre}
@@ -63,12 +83,27 @@ export default function MediaCard({ item }) {
           </small>
         </div>
       </div>
-      <p className="mb-0 mt-2.5 truncate text-xs font-semibold text-stone-800">
-        {item.title}
-      </p>
-      <p className="mb-0 mt-0.5 text-[10px] text-stone-400">
-        {item.genre} · {item.year}
-      </p>
+      <div className="mt-2.5 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="m-0 truncate text-xs font-semibold text-stone-800">
+            {item.title}
+          </p>
+          <p className="mb-0 mt-0.5 text-[10px] text-stone-400">
+            {item.genre} · {item.year}
+          </p>
+        </div>
+        {onRemove && (
+          <button
+            aria-label={`Delete ${item.title}`}
+            className="shrink-0 rounded px-1.5 py-0.5 text-xs text-stone-400 opacity-0 transition-opacity hover:bg-rose-100 hover:text-rose-700 focus-visible:opacity-100 group-hover:opacity-100"
+            onClick={() => onRemove(item.id)}
+            title="Remove from collection"
+            type="button"
+          >
+            ×
+          </button>
+        )}
+      </div>
     </article>
   );
 }
